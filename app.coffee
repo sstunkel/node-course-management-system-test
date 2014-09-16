@@ -11,8 +11,6 @@ bodyParser = require 'body-parser'
 redis = (require 'redis').createClient(13135, 'pub-redis-13135.us-east-1-3.2.ec2.garantiadata.com',
 	auth_pass: 'test')
 Nohm = (require 'nohm').Nohm
-Nohm.setPrefix('ArccosGolfTest')
-
 #import Models
 Nohm.model('Student',require './models/student')
 Nohm.model('Class',require './models/class')
@@ -51,63 +49,80 @@ router.route('/students')
 		student.p('name', req.body.name)
 		student.save (err) ->
 			res.send(err) if err
-			res.json student
+			res.json student #returns the student object if successful, invalid or error if not
+
 	#gets IDs of all students
 	.get (req, res) ->
 		student = Nohm.factory('Student', (err) ->
 			res.send(err))
 		student.find (err, ids) ->
 			res.send(err) if err
-			res.json ids
-			res.json(
-					message: 'No Students Found'
-				)
+			res.json ids if ids
+
+				
+
+
+
 #courses route
 router.route('/courses')
 	#lists all courses
 	.get (req,res) ->
 		Class = Nohm.factory('Class', (err) ->
 			res.send(err))
-		Class.find(err, ids) ->
+		Class.find( (err, ids) ->
 			res.send(err) if err
-			res. json ids #returns ids of all courses
+			res.json ids #returns ids of all courses
+		)
+
+	#make a new course
+	.post (req, res) ->
+		Class = Nohm.factory('Class', (err) ->
+			res.send(err) if err)
+		Class.p('name', req.body.name)
+		Class.p('course_id', req.body.course_id)
+		Class.save (err) ->
+			res.send(err) if err
+			res.json Class #returns the class object if successful, invalid or error if not
 		
+
+#search a course by course id		
 router.route('/courses/:course_id')
 	.get (req, res) ->
 		Class = Nohm.factory('Class', (err)->
 			res.send(err) if err)
+		console.log(req.params.course_id)
 		Class.find(
-			someString: req.params.course_id
+			course_id: req.params.course_id
 			, (err,ids) ->
 				res.send(err) if err
 				res.json ids[0] #returns id of first course that matched the course id
 			)
+
 #list ids of all students in course route
 router.route('/courses/:course_id/listStudents')
 	.get (req, res) ->
 		Class = Nohm.factory('Class', (err)->
 			res.send(err) if err)
-		Class.find(
-			someString: req.params.course_id
-			, (err,ids) ->
-				res.send(err) if err
-				Class.load(ids[0])
-				res.json Class.p('students') #returns ids of students enrolled in course
-			)
+		Class.load(req.params.course_id, (err) ->
+					res.send(err) if err
+					res.json Class.p('students') #returns ids of students enrolled in course
+				)
+				
 
 #add student to course route
 router.route('/courses/:course_id/addStudents/:student_id')
 	.get (req, res) ->
 		Class = Nohm.factory('Class', (err)->
 			res.send(err) if err)
-		Class.find(
-			someString: req.params.course_id
-			, (err,ids) ->
+		Class.load(req.params.course_id, (err) ->
+			res.send(err) if err
+			if Class.p('students') then students = Class.p('students') else students=[]
+			students.push(req.params.student_id)
+			Class.p('students', students)
+			Class.save (err)->
 				res.send(err) if err
-				Class.load(ids[0])
-				Class.p('students').push(req.params.course_id) #pushes new student on course
-				res.json Class.p('students') #returns ids of students enrolled in course
-			)
+				res.json Class #returns Class object if enrollment was successful
+		)
 
 
 

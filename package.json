@@ -1,12 +1,16 @@
 {
 	"name": "code-sample-for-arccos-golf",
-	"main": "app.js",
+	"main": "app.coffee",
+	"private": true,
+    "scripts": {
+    	"start": "nodemon ./app.coffee"
+  	},
 	"dependencies": {
 		"express": "*",
 		"body-parser": "*",
 		"redis": "*",
 		"nohm":"*",
-		"nodemon"::"*",
+		"nodemon":"*",
 		"coffee-script":"*"
 	}
 }
