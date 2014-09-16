@@ -1,0 +1,12 @@
+{
+	"name": "code-sample-for-arccos-golf",
+	"main": "app.js",
+	"dependencies": {
+		"express": "*",
+		"body-parser": "*",
+		"redis": "*",
+		"nohm":"*",
+		"nodemon"::"*",
+		"coffee-script":"*"
+	}
+}

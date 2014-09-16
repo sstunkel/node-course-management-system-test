@@ -1,0 +1,1 @@
+A small node.js API that lets you manage courses and students.
